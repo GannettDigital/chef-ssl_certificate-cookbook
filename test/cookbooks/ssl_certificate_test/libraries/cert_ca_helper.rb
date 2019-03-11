@@ -5,6 +5,7 @@
 # Description:: Library to create Certificate Authority.
 # Author:: Jeremy MAURO (<j.mauro@criteo.com>)
 # Author:: Xabier de Zuazo (<xabier@zuazo.org>)
+# Copyright:: Copyright (c) 2016 Xabier de Zuazo
 # Copyright:: Copyright (c) 2014 Onddo Labs, SL.
 # License:: Apache License, Version 2.0
 #
@@ -31,23 +32,16 @@ module CACertificate
       %w(subjectKeyIdentifier hash),
       ['basicConstraints', 'CA:TRUE', true],
       ['keyUsage', 'cRLSign,keyCertSign', true]
-    ]
-  end
-
-  def self.key_with_pass_phrase(key, pass_phrase)
-    cipher = OpenSSL::Cipher::Cipher.new('AES-128-CBC')
-
-    open(key_file, 'w', 0400) do |io|
-      io.write key.export(cipher, pass_phrase)
-    end
+    ].freeze
   end
 
   def self.key_to_file(key_file, pass_phrase = nil)
     key = OpenSSL::PKey::RSA.new(2048)
-    if pass_phrase
-      key_with_pass_phrase(key, pass_phrase)
-    else
-      open(key_file, 'w', 0400) do |io|
+    open(key_file, 'w', 0400) do |io|
+      if pass_phrase
+        cipher = OpenSSL::Cipher::Cipher.new('AES-128-CBC')
+        io.write key.export(cipher, pass_phrase)
+      else
         io.write key.to_pem
       end
     end
@@ -69,10 +63,10 @@ module CACertificate
     cert
   end
 
-  def self.ca_cert_to_file(subject, key_file, cert_file, time)
+  def self.ca_cert_to_file(subject, key_file, cert_file, time, key_pass = nil)
     key = File.open(key_file, 'rb', &:read)
 
-    key, cert = generate_generic_x509_key_cert(key, time)
+    key, cert = generate_generic_x509_key_cert(key, time, key_pass)
 
     generate_self_signed_ca_cert(key, cert, subject)
 

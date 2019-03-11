@@ -4,6 +4,7 @@
 # Library:: resource_ssl_certificate_key
 # Author:: Raul Rodriguez (<raul@raulr.net>)
 # Author:: Xabier de Zuazo (<xabier@zuazo.org>)
+# Copyright:: Copyright (c) 2016 Xabier de Zuazo
 # Copyright:: Copyright (c) 2014-2015 Onddo Labs, SL.
 # License:: Apache License, Version 2.0
 #
@@ -37,6 +38,7 @@ class Chef
             key_name
             key_dir
             key_path
+            key_mode
             key_source
             key_bag
             key_item
@@ -44,7 +46,8 @@ class Chef
             key_encrypted
             key_secret_file
             key_content
-          )
+            key_length
+          ).freeze
         end
 
         unless defined?(::Chef::Resource::SslCertificate::Key::SOURCES)
@@ -54,10 +57,8 @@ class Chef
             chef_vault
             file
             self_signed
-          )
+          ).freeze
         end
-
-        public
 
         def initialize_key_defaults
           initialize_attribute_defaults(Key::ATTRS)
@@ -73,6 +74,10 @@ class Chef
 
         def key_path(arg = nil)
           set_or_return(:key_path, arg, kind_of: String, required: true)
+        end
+
+        def key_mode(arg = nil)
+          set_or_return(:key_mode, arg, kind_of: [Integer, String])
         end
 
         def key_source(arg = nil)
@@ -103,6 +108,10 @@ class Chef
           set_or_return(:key_content, arg, kind_of: String)
         end
 
+        def key_length(arg = nil)
+          set_or_return(:key_length, arg, kind_of: Integer)
+        end
+
         protected
 
         def default_key_name
@@ -116,6 +125,19 @@ class Chef
         def default_key_path
           lazy_cached_variable(:default_key_path) do
             read_namespace(%w(ssl_key path)) || ::File.join(key_dir, key_name)
+          end
+        end
+
+        def default_key_mode
+          lazy do
+            read_namespace(%w(ssl_key mode)) || read_namespace('mode') || 00600
+          end
+        end
+
+        def default_key_length
+          lazy do
+            read_namespace(%w(ssl_key length)) || read_namespace('length') ||
+              2048
           end
         end
 
@@ -177,7 +199,7 @@ class Chef
         def default_key_content_from_self_signed
           content = read_from_path(key_path)
           unless content.is_a?(String)
-            content = generate_key
+            content = generate_key(key_length)
             updated_by_last_action(true)
           end
           content

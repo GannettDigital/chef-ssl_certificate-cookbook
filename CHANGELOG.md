@@ -1,193 +1,246 @@
-ssl_certificate CHANGELOG
-=========================
+# Change Log
+All notable changes to the `ssl_certificate` cookbook will be documented in this file.
 
-This file is used to list changes made in each version of the `ssl_certificate` cookbook.
+The format is based on [Keep a Changelog](http://keepachangelog.com/) and this project adheres to [Semantic Versioning](http://semver.org/).
 
-## v1.11.0 (2015-12-10)
+## [Unreleased]
+### Changed
+- CHANGELOG: Follow "Keep a CHANGELOG".
 
-* Fix some RuboCop offenses.
-* Only add internal file resources to the collection when running tests ([issue #23](https://github.com/zuazo/ssl_certificate-cookbook/pull/23), thanks [Karl Svec](https://github.com/karlsvec)).
-* Fix sending notifications from the `ssl_certificate` resource ([issue #21](https://github.com/zuazo/ssl_certificate-cookbook/pull/21), thanks [Karl Svec](https://github.com/karlsvec)).
-* .gitignore: remove metadata.json.
+## [2.1.0] - 2017-02-10
+### Added
+- Adds certificate chain to PKCS12 file ([issue #32](https://github.com/zuazo/ssl_certificate-cookbook/pull/32), thanks [Andrew J. Brown](https://github.com/andrewjamesbrown)).
 
-## v1.10.0 (2015-11-23)
+### Removed
+- Metadata: Remove grouping ([RFC-85](https://github.com/chef/chef-rfc/blob/master/rfc085-remove-unused-metadata.md)).
 
-* Fix some certificate errors on Windows due to CRLF conversion ([issue #19](https://github.com/zuazo/ssl_certificate-cookbook/pull/19), thanks [Taliesin Sisson](https://github.com/taliesins)).
-* Fix *undefined method pkcs12_path for Chef::Resource::File* error.
+## [2.0.0] - 2016-11-28
+### Added
+- Support for extendedKeyUsage and RSA key length ([issue #28](https://github.com/zuazo/ssl_certificate-cookbook/pull/28), thanks [Ali Ardestani](https://github.com/alisade) and [HawkAndBaby](https://github.com/hawkandbaby)).
+- Make resolver changeable on Nginx ([issue #29](https://github.com/zuazo/ssl_certificate-cookbook/pull/29), thanks [@runningman84](https://github.com/runningman84) for reporting).
 
-* Documentation:
- * README: Some typos and improvements.
+### Changed
+- Require Chef `12` and Ruby `2.2` or higher (**breaking change**).
 
-* Testing:
- * Gemfile updates:
-  * foodcritic `~> `5.0.0`
-  * RuboCop `~> `0.35.0`.
-  * Berkshelf `~> 4.0`.
-  * guard-foodcritic `~> 2.0`.
- * Rakefile:
-  * Fix integration task to allow arguments.
-  * Check CI.
+## [1.12.0] - 2016-06-06
+### Added
+- Add support for CA with passphrase ([issue #16](https://github.com/zuazo/ssl_certificate-cookbook/pull/16), thanks [Baptiste Courtois](https://github.com/Annih)).
+- Fallback to unencrypted data bag with `node['chef-vault']['databag_fallback']` ([issue #25](https://github.com/zuazo/ssl_certificate-cookbook/pull/25), thanks [Alexey Demidov](https://github.com/AlexeyDemidov)).
+- Add custom file mode for key file ([issue #26](https://github.com/zuazo/ssl_certificate-cookbook/pull/26), thanks [Alexey Demidov](https://github.com/AlexeyDemidov)).
 
-## v1.9.0 (2015-09-06)
+### Changed
+- Update RuboCop to `0.40`.
+- Documentation:
+ - Improve `chain_name` parameter requirement documentation ([issue #24](https://github.com/zuazo/ssl_certificate-cookbook/issues/24), thanks [Alexey Demidov](https://github.com/AlexeyDemidov)).
+ - Improve TESTING documentation.
+ - README: Add license badge.
 
-* Add support for [PKCS12](https://en.wikipedia.org/wiki/PKCS_12) ([issue #17](https://github.com/zuazo/ssl_certificate-cookbook/pull/17), thanks [Baptiste Courtois](https://github.com/Annih)).
-* metadata: Add `source_url` and `issues_url` links.
+### Removed
+- Remove useless test attributes ([issue #16](https://github.com/zuazo/ssl_certificate-cookbook/pull/16), thanks [Baptiste Courtois](https://github.com/Annih)).
 
-* Documentation:
- * README: Add *Real-world Examples* section.
+## [1.11.0] - 2015-12-10
+### Changed
+- Fix some RuboCop offenses.
 
-* Testing:
- * Run kitchen tests on CircleCI.
- * Travis CI: Use bundle cache.
- * Gemfile: Update RuboCop to `0.34.0`.
- * Rakfile: Use `Kitchen` ruby class instead of `sh`.
+### Fixed
+- Only add internal file resources to the collection when running tests ([issue #23](https://github.com/zuazo/ssl_certificate-cookbook/pull/23), thanks [Karl Svec](https://github.com/karlsvec)).
+- Fix sending notifications from the `ssl_certificate` resource ([issue #21](https://github.com/zuazo/ssl_certificate-cookbook/pull/21), thanks [Karl Svec](https://github.com/karlsvec)).
 
-## v1.8.1 (2015-09-03)
+## [1.10.0] - 2015-11-23
+### Changed
+- README: Some typos and improvements.
+- RuboCop `~> `0.35.0`.
 
-* README: Fix title.
+### Fixed
+- Fix some certificate errors on Windows due to CRLF conversion ([issue #19](https://github.com/zuazo/ssl_certificate-cookbook/pull/19), thanks [Taliesin Sisson](https://github.com/taliesins)).
+- Fix *undefined method pkcs12_path for Chef::Resource::File* error.
 
-## v1.8.0 (2015-09-03)
+## [1.9.0] - 2015-09-06
+### Added
+- Add support for [PKCS12](https://en.wikipedia.org/wiki/PKCS_12) ([issue #17](https://github.com/zuazo/ssl_certificate-cookbook/pull/17), thanks [Baptiste Courtois](https://github.com/Annih)).
+- metadata: Add `source_url` and `issues_url` links.
+- README: Add *Real-world Examples* section.
 
-* Fix Chef Supermarket cookbook links.
-* Add Windows support ([issue #15](https://github.com/zuazo/ssl_certificate-cookbook/pull/15), thanks [Baptiste Courtois](https://github.com/Annih)).
-* Add Oracle Linux and Scientific Linux support.
-* Improve platforms support using `node['platform_family']` attribute.
+### Changed
+- Gemfile: Update RuboCop to `0.34.0`.
 
-* Documentation:
- * README:
-  * Add ca path documentation to the namespace attributes.
-  * Improve description.
- * TESTING: Add Docker and EC2 documentation.
+## [1.8.1] - 2015-09-03
+### Fixed
+- README: Fix title.
 
-* Testing:
- * Use `SoloRunner` to run unit tests faster.
- * Move ChefSpec tests to *test/unit*.
- * Add *.kitchen.docker.yml* file.
- * Travis CI: Run against Ruby `2.2`.
- * Gemfile: kichen-docker ~> `2.1`.
- * Rakfile: Add clean task.
+## [1.8.0] - 2015-09-03
+### Added
+- Add Windows support ([issue #15](https://github.com/zuazo/ssl_certificate-cookbook/pull/15), thanks [Baptiste Courtois](https://github.com/Annih)).
+- Add Oracle Linux and Scientific Linux support.
+- README: Add ca path documentation to the namespace attributes.
 
-## v1.7.0 (2015-08-12)
+### Changed
+- Improve platforms support using `node['platform_family']` attribute.
+- README: Improve description.
 
-* Fix README tables.
-* Update contact information and links after migration.
-* Gemfile: Update RuboCop to `0.33.0`.
-* Update chef links to use *chef.io*.
+### Fixed
+- Fix Chef Supermarket cookbook links.
 
-## v1.6.0 (2015-08-02)
+## [1.7.0] - 2015-08-12
+### Changed
+- Update contact information and links after migration.
+- Update chef links to use *chef.io*.
+- Gemfile: Update RuboCop to `0.33.0`.
 
-* Load encrypted secret before passing to the `EncryptedDataBagItem.load` ([issue #14](https://github.com/zuazo/ssl_certificate-cookbook/pull/14), thanks [Nikita Borzykh](https://github.com/sample)).
-* Update RuboCop to `0.32.1`.
-* README:
- * Use markdown tables.
- * Add GitHub badge.
+### Fixed
+- Fix README tables.
 
-## v1.5.0 (2015-04-25)
+## [1.6.0] - 2015-08-02
+### Added
+- README: Add GitHub badge.
 
-* Add sensitive true to the created files ([issue #12](https://github.com/zuazo/ssl_certificate-cookbook/issues/12), thanks [Jonathan Chauncey](https://github.com/jchauncey) for reporting).
-* Add support for different types in Subject Alternative Names ([issue #13](https://github.com/zuazo/ssl_certificate-cookbook/issues/13), thanks [Jonathan Chauncey](https://github.com/jchauncey) for reporting).
-* README: Fix all RuboCop offenses in examples.
-* Update Gemfile and kitchen.yml files.
-  * Gemfile: Update RuboCop to `0.30.1`.
+### Changed
+- Update RuboCop to `0.32.1`.
+- README: Use markdown tables.
 
-## v1.4.0 (2015-04-05)
+### Fixed
+- Load encrypted secret before passing to the `EncryptedDataBagItem.load` ([issue #14](https://github.com/zuazo/ssl_certificate-cookbook/pull/14), thanks [Nikita Borzykh](https://github.com/sample)).
 
-* Add `attr_apply` recipe: Create a certificate list from attributes ([issue #10](https://github.com/zuazo/ssl_certificate-cookbook/pull/10), thanks [Stanislav Bogatyrev](https://github.com/realloc)).
-* Fix invalid metadata ([issue #11](https://github.com/zuazo/ssl_certificate-cookbook/pull/11), thanks [Karl Svec](https://github.com/karlsvec)).
-* Update RuboCop to `0.29.1` (fix some new offenses).
+## [1.5.0] - 2015-04-25
+### Added
+- Add sensitive true to the created files ([issue #12](https://github.com/zuazo/ssl_certificate-cookbook/issues/12), thanks [Jonathan Chauncey](https://github.com/jchauncey) for reporting).
+- Add support for different types in Subject Alternative Names ([issue #13](https://github.com/zuazo/ssl_certificate-cookbook/issues/13), thanks [Jonathan Chauncey](https://github.com/jchauncey) for reporting).
 
-## v1.3.0 (2015-02-03)
+### Changed
+- README: Fix all RuboCop offenses in examples.
+- Gemfile: Update RuboCop to `0.30.1`.
 
-* Add `namespace['source']` common attribute.
-* Fix chef vault source: `chef_gem` method not found error.
-* Fix `#data_bag_read_fail` method name.
-* README: Fix *item_key* attribute name.
+## [1.4.0] - 2015-04-05
+### Added
+- Add `attr_apply` recipe: Create a certificate list from attributes ([issue #10](https://github.com/zuazo/ssl_certificate-cookbook/pull/10), thanks [Stanislav Bogatyrev](https://github.com/realloc)).
 
-## v1.2.2 (2015-01-16)
+### Changed
+- Update RuboCop to `0.29.1` (fix some new offenses).
 
-* Fix unit tests: Run the tests agains Chef 11 and Chef 12.
+### Fixed
+- Fix invalid metadata ([issue #11](https://github.com/zuazo/ssl_certificate-cookbook/pull/11), thanks [Karl Svec](https://github.com/karlsvec)).
 
-## v1.2.1 (2015-01-16)
+## [1.3.0] - 2015-02-03
+### Added
+- Add `namespace['source']` common attribute.
 
-* Fix *key content* when using `'file'` source.
+### Fixed
+- Fix chef vault source: `chef_gem` method not found error.
+- Fix `#data_bag_read_fail` method name.
+- README: Fix *item_key* attribute name.
 
-## v1.2.0 (2015-01-07)
+## [1.2.2] - 2015-01-16
+### Fixed
+- Fix unit tests: Run the tests agains Chef 11 and Chef 12.
 
-* Fix file source path in attributes.
-* Fix *"stack level too deep"* error with CA certificates.
-* Nginx template: Add `ssl on;` directive.
-* Remove setting CA in apache template (bad idea).
-* Rename template helpers to service helpers.
- * Document *ServiceHelpers* methods.
-* README: Some small fixes.
+## [1.2.1] - 2015-01-16
+### Fixed
+- Fix *key content* when using `'file'` source.
 
-## v1.1.0 (2015-01-02)
+## [1.2.0] - 2015-01-07
+### Added
+- Document the *ServiceHelpers* methods.
 
-* Fix FreeBSD support.
-* Allow to change the certificate file owner.
-* Web server template improvements:
- * Fix Apache 2.4 support.
- * Add partial templates for Apache and nginx.
- * Add CA certificate file support.
- * Add adjustable SSL compatibility level.
- * Add OCSP stapling support.
- * Enable HSTS and stapling by default.
-* Fix all integration tests.
+### Changed
+- Rename template helpers to service helpers.
 
-## v1.0.0 (2014-12-30)
+### Fixed
+- Fix file source path in attributes.
+- Fix *"stack level too deep"* error with CA certificates.
+- Nginx template: Add `ssl on;` directive.
+- README: Some small fixes.
 
-* Bugfix: Cannot read SSL intermediary chain from data bag.
-* Fix Directory Permissions for Apache `2.4` ([issue #7](https://github.com/zuazo/ssl_certificate-cookbook/pull/7), thanks [Elliott Davis](https://github.com/elliott-davis)).
-* Add CA support for self signed certificates ([issue #8](https://github.com/zuazo/ssl_certificate-cookbook/pull/8), thanks [Jeremy MAURO](https://github.com/jmauro)).
-* Apache template:
-  * Disable `SSLv3` by default (**breaking change**).
-  * Add chained certificate support.
-  * Allow to change the cipher suite and protocol in the apache template.
-* Big code clean up:
-  * Split resource code in multiple files.
-  * Remove duplicated code.
-  * Integrate with foodcritic.
-  * Integrate with RuboCop.
-  * Integrate with `should_not` gem.
-  * Integrate with travis-ci, codeclimate and gemnasium.
-  * Homogenize license headers.
-* Add ChefSpec unit tests.
-* Add integration tests: bats and Serverspec.
-* Update Gemfile and Berksfile files.
-* Add Guardfile.
-* README:
-  * Multiple fixes and improvements ([issue #9](https://github.com/zuazo/ssl_certificate-cookbook/pull/9), thanks [Benjamin Nørgaard](https://github.com/blacksails)).
-  * Split in multiple files.
-  * Add TOC.
-  * Add badges.
-* Add LICENSE file.
+### Removed
+- Remove setting CA in apache template (bad idea).
 
-## v0.4.0 (2014-11-19)
+## [1.1.0] - 2015-01-02
+### Added
+- Allow to change the certificate file owner.
+- Web server template improvements:
+ - Add partial templates for Apache and nginx.
+ - Add CA certificate file support.
+ - Add adjustable SSL compatibility level.
+ - Add OCSP stapling support.
+ - Enable HSTS and stapling by default.
 
-* Add Apache 2.4 support ([issue #4](https://github.com/zuazo/ssl_certificate-cookbook/pull/4), thanks [Djuri Baars](https://github.com/dsbaars)).
-* Add supported platform list.
-* kitchen.yml completed and updated.
+### Fixed
+- Fix FreeBSD support.
+- Fix all integration tests.
+- Fix Apache 2.4 support.
 
-## v0.3.0 (2014-11-03)
+## [1.0.0] - 2014-12-30
+### Added
+- Add CA support for self signed certificates ([issue #8](https://github.com/zuazo/ssl_certificate-cookbook/pull/8), thanks [Jeremy MAURO](https://github.com/jmauro)).
 
+### Changed
+- Apache template:
+  - Disable `SSLv3` by default (**breaking change**).
+  - Add chained certificate support.
+  - Allow to change the cipher suite and protocol in the apache template.
+- Big code clean up:
+  - Split resource code in multiple files.
+  - Remove duplicated code.
+  - Integrate with foodcritic.
+  - Integrate with RuboCop.
+  - Homogenize license headers.
+- README:
+  - Multiple fixes and improvements ([issue #9](https://github.com/zuazo/ssl_certificate-cookbook/pull/9), thanks [Benjamin Nørgaard](https://github.com/blacksails)).
+  - Split in multiple files.
+  - Add TOC.
+  - Add badges.
+
+### Fixed
+- Bugfix: Cannot read SSL intermediary chain from data bag.
+- Fix Directory Permissions for Apache `2.4` ([issue #7](https://github.com/zuazo/ssl_certificate-cookbook/pull/7), thanks [Elliott Davis](https://github.com/elliott-davis)).
+
+## [0.4.0] - 2014-11-19
+### Added
+- Add Apache 2.4 support ([issue #4](https://github.com/zuazo/ssl_certificate-cookbook/pull/4), thanks [Djuri Baars](https://github.com/dsbaars)).
+- Add supported platform list.
+
+## [0.3.0] - 2014-11-03
 Special thanks to [Steve Meinel](https://github.com/smeinel) for his great contributions.
 
-* Add Subject Alternate Names support for certs ([issue #2](https://github.com/zuazo/ssl_certificate-cookbook/pull/2), thanks [Steve Meinel](https://github.com/smeinel)).
-* Add support for deploying an intermediate cert chain file ([issue #3](https://github.com/zuazo/ssl_certificate-cookbook/pull/3), thanks [Steve Meinel](https://github.com/smeinel)).
-* ChefSpec matchers: add helper methods to locate LWRP resources.
-* README: Chef `11.14.2` required.
-* TODO: complete it with more tasks and use checkboxes.
+### Added
+- Add Subject Alternate Names support for certs ([issue #2](https://github.com/zuazo/ssl_certificate-cookbook/pull/2), thanks [Steve Meinel](https://github.com/smeinel)).
+- Add support for deploying an intermediate cert chain file ([issue #3](https://github.com/zuazo/ssl_certificate-cookbook/pull/3), thanks [Steve Meinel](https://github.com/smeinel)).
+- ChefSpec matchers: add helper methods to locate LWRP resources.
 
-## v0.2.1 (2014-09-14)
+## [0.2.1] - 2014-09-14
+### Fixed
+- `ssl_certificate` resource notifications fixed (issue [#1](https://github.com/zuazo/ssl_certificate-cookbook/pull/1), thanks [Matt Graham](https://github.com/gadgetmg) for reporting)
 
-* `ssl_certificate` resource notifications fixed (issue [#1](https://github.com/zuazo/ssl_certificate-cookbook/pull/1), thanks [Matt Graham](https://github.com/gadgetmg) for reporting)
+## [0.2.0] - 2014-08-13
+### Added
+- Added ChefSpec ssl_certificate matcher
 
-## v0.2.0 (2014-08-13)
+### Fixed
+- Fixed: undefined method "key_path" for nil:NilClass
+- README: fixed ruby syntax highlighting in one example
 
-* Added ChefSpec ssl_certificate matcher
-* Fixed: undefined method "key_path" for nil:NilClass
-* README: fixed ruby syntax highlighting in one example
+## 0.1.0 - 2014-04-15
+- Initial release of `ssl_certificate`
 
-## v0.1.0 (2014-04-15)
-
-* Initial release of `ssl_certificate`
+[Unreleased]: https://github.com/zuazo/ssl_certificate-cookbook/compare/2.1.0...HEAD
+[2.1.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/2.0.0...2.1.0
+[2.0.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.12.0...2.0.0
+[1.12.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.11.0...1.12.0
+[1.11.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.10.0...1.11.0
+[1.10.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.9.0...1.10.0
+[1.9.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.8.1...1.9.0
+[1.8.1]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.8.0...1.8.1
+[1.8.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.7.0...1.8.0
+[1.7.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.6.0...1.7.0
+[1.6.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.5.0...1.6.0
+[1.5.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.4.0...1.5.0
+[1.4.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.3.0...1.4.0
+[1.3.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.2.2...1.3.0
+[1.2.2]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.2.1...1.2.2
+[1.2.1]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.2.0...1.2.1
+[1.2.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.1.0...1.2.0
+[1.1.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/1.0.0...1.1.0
+[1.0.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/0.4.0...1.0.0
+[0.4.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/0.3.0...0.4.0
+[0.3.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/0.2.1...0.3.0
+[0.2.1]: https://github.com/zuazo/ssl_certificate-cookbook/compare/0.2.0...0.2.1
+[0.2.0]: https://github.com/zuazo/ssl_certificate-cookbook/compare/0.1.0...0.2.0

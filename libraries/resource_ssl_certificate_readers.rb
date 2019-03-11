@@ -4,6 +4,7 @@
 # Library:: resource_ssl_certificate_readers
 # Author:: Raul Rodriguez (<raul@raulr.net>)
 # Author:: Xabier de Zuazo (<xabier@zuazo.org>)
+# Copyright:: Copyright (c) 2016 Xabier de Zuazo
 # Copyright:: Copyright (c) 2014-2015 Onddo Labs, SL.
 # License:: Apache License, Version 2.0
 #
@@ -62,7 +63,7 @@ class Chef
         def safe_read_namespace(desc, ary)
           data = read_namespace(ary)
           unless data.is_a?(String)
-            fail "Cannot read #{desc} from node attributes"
+            raise "Cannot read #{desc} from node attributes"
           end
           data
         end
@@ -75,13 +76,13 @@ class Chef
         def safe_read_from_path(desc, path)
           data = read_from_path(path)
           unless data.is_a?(String)
-            fail "Cannot read #{desc} from path: #{path}"
+            raise "Cannot read #{desc} from path: #{path}"
           end
           data
         end
 
         def data_bag_read_fail(desc, db, type = 'data bag')
-          fail "Cannot read #{desc} from #{type}: "\
+          raise "Cannot read #{desc} from #{type}: "\
             "#{db[:bag]}.#{db[:item]}[#{db[:key]}]"
         end
 
@@ -109,10 +110,21 @@ class Chef
           data
         end
 
+        def read_from_chef_vault_with_fallback(bag, item)
+          if ChefVault::Item.vault?(bag, item)
+            ChefVault::Item.load(bag, item)
+          elsif node['chef-vault']['databag_fallback']
+            Chef::DataBagItem.load(bag, item)
+          else
+            raise "Trying to load a regular data bag item #{item}"\
+              " from #{bag}, and databag_fallback is disabled"
+          end
+        end
+
         def read_from_chef_vault(bag, item, key)
           require 'chef-vault'
           unsafe_no_exceptions_block do
-            data = ChefVault::Item.load(bag, item)
+            data = read_from_chef_vault_with_fallback(bag, item)
             data[key.to_s]
           end
         end

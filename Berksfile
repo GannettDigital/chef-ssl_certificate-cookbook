@@ -2,8 +2,10 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+# More info at http://berkshelf.com/#the-berksfile
+
 source 'https://supermarket.chef.io'
-my_cookbook = ::File.basename(Dir.pwd).sub(/[-_]?cookbook$/, '')
+my_cookbook = 'ssl_certificate'
 
 # Berkshelf helper to include a local cookbook from disk.
 #
@@ -15,6 +17,13 @@ def local_cookbook(name, version = '>= 0.0.0', options = {})
   cookbook(name, version, {
     path: "../../cookbooks/#{name}"
   }.merge(options))
+end
+
+# "This resource is written with Chef 12.5 custom resources" error:
+if ENV.key?('CHEF_VERSION') &&
+   Gem::Requirement.new(ENV['CHEF_VERSION'])
+                   .satisfied_by?(Gem::Version.new('11.0.0'))
+  cookbook 'rsyslog', '~> 2.0'
 end
 
 cookbook 'apt'

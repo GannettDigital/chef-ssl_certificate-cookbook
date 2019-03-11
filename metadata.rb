@@ -3,6 +3,7 @@
 # Cookbook Name:: ssl_certificate
 # Author:: Raul Rodriguez (<raul@raulr.net>)
 # Author:: Xabier de Zuazo (<xabier@zuazo.org>)
+# Copyright:: Copyright (c) 2016 Xabier de Zuazo
 # Copyright:: Copyright (c) 2014-2015 Onddo Labs, SL.
 # License:: Apache License, Version 2.0
 #
@@ -30,7 +31,7 @@ reading them from attributes, data bags or chef-vaults. Exposing its
 configuration through node attributes.
 EOS
 long_description IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version '1.12.0' # WiP
+version '2.2.0' # WiP
 
 if respond_to?(:source_url)
   source_url "https://github.com/zuazo/#{name}-cookbook"
@@ -38,6 +39,8 @@ end
 if respond_to?(:issues_url)
   issues_url "https://github.com/zuazo/#{name}-cookbook/issues"
 end
+
+chef_version '>= 12' if respond_to?(:chef_version)
 
 supports 'amazon'
 supports 'debian'
@@ -66,20 +69,12 @@ attribute 'ssl_certificate/cert_dir',
           required: 'optional',
           calculated: true
 
-grouping 'ssl_certificate/service',
-         title: 'ssl_certificate service',
-         description: 'ssl_certificate service defaults.'
-
 attribute 'ssl_certificate/service/cipher_suite',
           display_name: 'ssl_certificate service cipher suite',
           description: 'Service default SSL cipher suite.',
           type: 'string',
           required: 'optional',
           default: nil
-
-grouping 'ssl_certificate/service/protocols',
-         title: 'ssl_certificate service protocol',
-         description: 'ssl_certificate service SSL protocols.'
 
 attribute 'ssl_certificate/service/protocols/nginx',
           display_name: 'ssl_certificate service protocol',
@@ -115,3 +110,18 @@ attribute 'ssl_certificate/service/use_stapling',
           type: 'string',
           required: 'optional',
           calculated: true
+
+attribute 'ssl_certificate/service/stapling_resolver',
+          display_name: 'ssl_certificate stapling resolver',
+          description: 'DNS resolver to use for OCSP. Only with Nginx.',
+          type: 'string',
+          required: 'optional',
+          calculated: true
+
+attribute 'chef-vault/databag_fallback',
+          display_name: 'fallback to unencrypted data bags',
+          description: 'Whether to fallback to unencrypted data bag if'\
+                       ' chef-vault not found.',
+          type: 'string',
+          required: 'optional',
+          default: 'false'

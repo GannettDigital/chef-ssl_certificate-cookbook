@@ -4,6 +4,7 @@
 # Library:: resource_ssl_certificate_generation
 # Author:: Raul Rodriguez (<raul@raulr.net>)
 # Author:: Xabier de Zuazo (<xabier@zuazo.org>)
+# Copyright:: Copyright (c) 2016 Xabier de Zuazo
 # Copyright:: Copyright (c) 2014 Onddo Labs, SL.
 # License:: Apache License, Version 2.0
 #
@@ -31,8 +32,8 @@ class Chef
     class SslCertificate < Chef::Resource
       # ssl_certificate Chef Resource cert generator helpers.
       module Generators
-        def generate_key
-          OpenSSL::PKey::RSA.new(2048).to_pem
+        def generate_key(length = 2048)
+          OpenSSL::PKey::RSA.new(length).to_pem
         end
 
         unless defined?(::Chef::Resource::SslCertificate::Generators::FIELDS)
@@ -65,7 +66,7 @@ class Chef
               field: 'emailAddress',
               type: OpenSSL::ASN1::UTF8STRING
             }
-          }
+          }.freeze
         end
 
         unless defined?(::Chef::Resource::SslCertificate::Generators::
@@ -81,7 +82,7 @@ class Chef
               %w(subjectKeyIdentifier hash),
               %w(keyUsage keyEncipherment,dataEncipherment,digitalSignature)
             ]
-          }
+          }.freeze
         end
 
         def generate_cert_subject_from_string(s)
@@ -116,8 +117,8 @@ class Chef
           csr
         end
 
-        def generate_generic_x509_key_cert(key, time)
-          key = OpenSSL::PKey::RSA.new(key)
+        def generate_generic_x509_key_cert(key, time, key_pass = nil)
+          key = OpenSSL::PKey::RSA.new(key, key_pass)
           cert = OpenSSL::X509::Certificate.new
           cert.version = 2
           cert.serial = OpenSSL::BN.rand(160)
@@ -156,12 +157,17 @@ class Chef
           if subject_alternate_names
             handle_subject_alternative_names(cert, ef, subject_alternate_names)
           end
+
+          if extended_key_usage
+            handle_extended_key_usage(cert, ef, extended_key_usage)
+          end
+
           cert.sign(key, OpenSSL::Digest::SHA256.new)
         end
 
         def generate_ca_from_content(cert_content, key_content)
           ca_cert = OpenSSL::X509::Certificate.new(cert_content)
-          ca_key = OpenSSL::PKey::RSA.new(key_content)
+          ca_key = OpenSSL::PKey::RSA.new(key_content, ca_key_passphrase)
           [ca_cert, ca_key]
         end
 
@@ -188,13 +194,18 @@ class Chef
           if subject_alternate_names
             handle_subject_alternative_names(cert, ef, subject_alternate_names)
           end
+
+          if extended_key_usage
+            handle_extended_key_usage(cert, ef, extended_key_usage)
+          end
+
           cert.sign(ca_key, OpenSSL::Digest::SHA256.new)
         end
 
         # Based on https://gist.github.com/nickyp/886884
-        def generate_cert(
-          key, subject, time, ca_cert_content = nil, ca_key_content = nil
-        )
+        def generate_cert(key, subject, time, ca_cert_content = nil,
+                          ca_key_content = nil)
+
           key, cert = generate_generic_x509_key_cert(key, time)
           if ca_cert_content && ca_key_content
             generate_self_signed_cert_with_ca(
@@ -209,11 +220,19 @@ class Chef
         # https://github.com/cchandler/certificate_authority/blob/master/lib
         # /certificate_authority/signing_request.rb
         def handle_subject_alternative_names(cert, factory, alt_names)
-          fail 'alt_names must be an Array' unless alt_names.is_a?(Array)
+          raise 'alt_names must be an Array' unless alt_names.is_a?(Array)
 
           name_list =
             alt_names.map { |m| m.include?(':') ? m : "DNS:#{m}" }.join(',')
           ext = factory.create_ext('subjectAltName', name_list, false)
+          cert.add_extension(ext)
+        end
+
+        def handle_extended_key_usage(cert, factory, usage)
+          raise 'extended_key_usage must be an Array' unless usage.is_a?(Array)
+
+          usage_list = usage.join(',')
+          ext = factory.create_ext('extendedKeyUsage', usage_list, false)
           cert.add_extension(ext)
         end
 
@@ -246,8 +265,9 @@ class Chef
             cert.issuer.cmp(cur_subject) == 0
         end
 
-        def verify_self_signed_cert(key, cert, _hostname, ca_cert_content = nil)
-          key = OpenSSL::PKey::RSA.new(key)
+        def verify_self_signed_cert(key, cert, _hostname,
+                                    ca_cert_content = nil, pass_phrase = nil)
+          key = OpenSSL::PKey::RSA.new(key, pass_phrase)
           cert = OpenSSL::X509::Certificate.new(cert)
           if ca_cert_content
             compare_self_signed_cert_with_ca(key, cert, ca_cert_content)

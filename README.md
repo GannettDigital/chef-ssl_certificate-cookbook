@@ -1,7 +1,9 @@
 SSL Certificate Cookbook
 ==========================
+[![GitHub](http://img.shields.io/badge/github-zuazo/ssl__certificate--cookbook-blue.svg?style=flat)](https://github.com/zuazo/ssl_certificate-cookbook)
+[![License](https://img.shields.io/github/license/zuazo/ssl_certificate-cookbook.svg?style=flat)](#license-and-author)
+
 [![Cookbook Version](https://img.shields.io/cookbook/v/ssl_certificate.svg?style=flat)](https://supermarket.chef.io/cookbooks/ssl_certificate)
-[![GitHub Source](https://img.shields.io/badge/source-GitHub-blue.svg?style=flat)](https://github.com/zuazo/ssl_certificate-cookbook)
 [![Dependency Status](http://img.shields.io/gemnasium/zuazo/ssl_certificate-cookbook.svg?style=flat)](https://gemnasium.com/zuazo/ssl_certificate-cookbook)
 [![Code Climate](http://img.shields.io/codeclimate/github/zuazo/ssl_certificate-cookbook.svg?style=flat)](https://codeclimate.com/github/zuazo/ssl_certificate-cookbook)
 [![Build Status](http://img.shields.io/travis/zuazo/ssl_certificate-cookbook.svg?style=flat)](https://travis-ci.org/zuazo/ssl_certificate-cookbook)
@@ -75,8 +77,8 @@ Please, [let us know](https://github.com/zuazo/ssl_certificate-cookbook/issues/n
 
 ## Required Applications
 
-* Chef `>= 11.14.2`.
-* Ruby `2` or higher.
+* Chef `12` or higher.
+* Ruby `2.3` or higher.
 
 Usage
 =====
@@ -138,12 +140,14 @@ When a namespace is set in the resource, it will try to read the following attri
 | `namespace['secret_file']`                         | Attribute for setting certificate chef secret file and key chef secret file (both) to a value (`key_secret_file` and `cert_secret_file`).
 | `namespace['ssl_key']['source']`                   | Source type to get the SSL key from. Can be `'self-signed'`, `'attribute'`, `'data-bag'`, `'chef-vault'` or `'file'`.
 | `namespace['ssl_key']['path']`                     | File path of the SSL key.
+| `namespace['ssl_key']['mode']`                     | File mode of the SSL key.
 | `namespace['ssl_key']['bag']`                      | Name of the Data Bag where the SSL key is stored.
 | `namespace['ssl_key']['item']`                     | Name of the Data Bag Item where the SSL key is stored.
 | `namespace['ssl_key']['item_key']`                 | Key of the Data Bag Item where the SSL key is stored.
 | `namespace['ssl_key']['encrypted']`                | Whether the Data Bag where the SSL key is stored is encrypted.
 | `namespace['ssl_key']['secret_file']`              | Secret file used to decrypt the Data Bag where the SSL key is stored.
 | `namespace['ssl_key']['content']`                  | SSL key content used when reading from attributes.
+| `namespace['ssl_key']['length']`                   | RSA key length used when generating a new key.
 | `namespace['ssl_cert']['source']`                  | Source type to get the SSL cert from. Can be `'self-signed'`, `'attribute'`, `'data-bag'`, `'chef-vault'` or `'file'`.
 | `namespace['ssl_cert']['path']`                    | File path of the SSL certificate.
 | `namespace['ssl_cert']['bag']`                     | Name of the Data Bag where the SSL cert is stored.
@@ -153,9 +157,11 @@ When a namespace is set in the resource, it will try to read the following attri
 | `namespace['ssl_cert']['secret_file']`             | Secret file used to decrypt the Data Bag where the SSL cert is stored.
 | `namespace['ssl_cert']['content']`                 | SSL cert content used when reading from attributes.
 | `namespace['ssl_cert']['subject_alternate_names']` | An array of Subject Alternate Names for the SSL cert. Needed if your site has multiple domain names on the same cert.
-| `namespace['ssl_chain']['name']`                   | File name to be used for the intermediate certificate chain file. *If this is not present, no chain file will be written.*
+| `namespace['ssl_cert']['extended_key_usage']`      | An array of extended key usage attributes.
+| `namespace['ssl_chain']['name']`                   | File name to be used for the intermediate certificate chain file. **If this is not present, no chain file will be written.**
 | `namespace['ssl_chain']['source']`                 | Source type to get the intermediate certificate chain from. Can be `'attribute'`, `'data-bag'`, `'chef-vault'` or `'file'`.
 | `namespace['ssl_chain']['path']`                   | File path of the intermediate SSL certificate chain.
+| `namespace['ssl_chain']['combined_path']`          | File path of the combined certificates (intermediate chain + domain certificate).
 | `namespace['ssl_chain']['bag']`                    | Name of the Data Bag where the intermediate certificate chain is stored.
 | `namespace['ssl_chain']['item']`                   | Name of the Data Bag Item where the intermediate certificate chain is stored.
 | `namespace['ssl_chain']['item_key']`               | Key of the Data Bag Item where the intermediate certificate chain is stored.
@@ -164,6 +170,7 @@ When a namespace is set in the resource, it will try to read the following attri
 | `namespace['ssl_chain']['content']`                | Intermediate certificate chain content used when reading from attributes.
 | `namespace['ca_cert_path']`                        | Certificate Authority full path.
 | `namespace['ca_key_path']`                         | Key Authority full path.
+| `namespace['ca_key_passphrase']`                   | Key Authority passphrase.
 | `namespace['pkcs12_path']`                         | Optional PKCS12 full path.
 | `namespace['pkcs12_passphrase']`                   | Optional PKCS12 passphrase.
 
@@ -210,6 +217,7 @@ my_cert_path = '/etc/certs/my-webapp.pem'
 # know the paths
 ssl_certificate 'my-webapp' do
   key_path my_key_path
+  key_mode 00640
   cert_path my_cert_path
 end
 
@@ -402,6 +410,10 @@ ssl_certificate 'mysite' do
 end
 ```
 
+For testing you can enabled fall back to use unencrypted data bags if chef
+vault is not found by setting attribute `['chef-vault']['databag_fallback']` to
+true value
+
 ### Reading the Certificate from Files
 
 ```ruby
@@ -567,6 +579,7 @@ cert = ssl_certificate 'test' do
   cert_source 'with_ca'
   ca_cert_path ca_cert
   ca_key_path ca_key
+  ca_key_passphrase ca_key_passphrase
 end
 ```
 
@@ -684,15 +697,16 @@ Attributes
 
 The following attributes are used to integrate SSL specific configurations with different services (Apache, nginx, ...). They are used internally by [the apache and nginx templates](#templates).
 
-| Attribute                                             | Default      | Description                        |
-|:------------------------------------------------------|:-------------|:-----------------------------------|
-| `node['ssl_certificate']['service']['cipher_suite']`  | `nil`        | Service default SSL cipher suite.
-| `node['ssl_certificate']['service']['protocols']`     | `nil`        | Service default SSL protocols.
-| `node['ssl_certificate']['service']['apache']`        | *calculated* | Apache web service httpd specific SSL attributes.
-| `node['ssl_certificate']['service']['nginx']`         | *calculated* | nginx web service specific SSL attributes.
-| `node['ssl_certificate']['service']['compatibility']` | `nil`        | Service SSL compatibility level (See [below](#securing-server-side-tls)).
-| `node['ssl_certificate']['service']['use_hsts']`      | `true`       | Whether to enable [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) in the service.
-| `node['ssl_certificate']['service']['use_stapling']`  | *calculated* | Whether to enable [OCSP stapling](http://en.wikipedia.org/wiki/OCSP_stapling) in the service (nginx only, use `node['apache']['mod_ssl']['use_stapling']` for apache).
+| Attribute                                                  | Default      | Description                        |
+|:-----------------------------------------------------------|:-------------|:-----------------------------------|
+| `node['ssl_certificate']['service']['cipher_suite']`       | `nil`        | Service default SSL cipher suite.
+| `node['ssl_certificate']['service']['protocols']`          | `nil`        | Service default SSL protocols.
+| `node['ssl_certificate']['service']['apache']`             | *calculated* | Apache web service httpd specific SSL attributes.
+| `node['ssl_certificate']['service']['nginx']`              | *calculated* | nginx web service specific SSL attributes.
+| `node['ssl_certificate']['service']['compatibility']`      | `nil`        | Service SSL compatibility level (See [below](#securing-server-side-tls)).
+| `node['ssl_certificate']['service']['use_hsts']`           | `true`       | Whether to enable [HSTS](http://en.wikipedia.org/wiki/HTTP_Strict_Transport_Security) in the service.
+| `node['ssl_certificate']['service']['use_stapling']`       | *calculated* | Whether to enable [OCSP stapling](http://en.wikipedia.org/wiki/OCSP_stapling) in the service (nginx only, use `node['apache']['mod_ssl']['use_stapling']` for apache).
+| `node['ssl_certificate']['service']['stapling_resolver']`  | *calculated* | DNS resolver to use for OCSP. Only with Nginx.
 
 See the [`ServiceHelpers` class documentation](http://www.rubydoc.info/github/zuazo/ssl_certificate-cookbook/master/Chef/SslCertificateCookbook/ServiceHelpers) to learn how to integrate them with new services.
 
@@ -739,6 +753,7 @@ By default the resource will create a self-signed certificate, but a custom one 
 | encrypted               | `nil`                          | Write only attribute for setting certificate encryption and key encryption (both) to a value (`key_encrypted` and `cert_encrypted`).
 | secret_file             | `nil`                          | Write only attribute for setting certificate chef secret file and key chef secret file (both) to a value (`key_secret_file` and `cert_secret_file`).
 | key_path                | *calculated*                   | Private key full path.
+| key_mode                | `0600`                         | Private key file mode.
 | key_name                | `"#{name}.key"`                | Private key file name.
 | key_dir                 | *calculated*                   | Private key directory path.
 | key_source              | `'self-signed'`                | Source type to get the SSL key from. Can be `'self-signed'`, `'attribute'`, `'data-bag'`, `'chef-vault'` or `'file'`.
@@ -746,8 +761,9 @@ By default the resource will create a self-signed certificate, but a custom one 
 | key_item                | `namespace['ssl_key']['item']` | Name of the Data Bag Item where the SSL key is stored.
 | key_item_key            | *calculated*                   | Key of the Data Bag Item where the SSL key is stored.
 | key_encrypted           | `false`                        | Whether the Data Bag where the SSL key is stored is encrypted.
+| key_length              | `2048`                         | Integer that must be a power of 2, with a reasonable maximum of 4096. This defines the length of a generated RSA key. 
 | key_secret_file         | `nil`                          | Secret file used to decrypt the Data Bag where the SSL key is stored.
-| key_content             | *calculated*                   | SSL key file content in clear. **Be careful when using it.******
+| key_content             | *calculated*                   | SSL key file content in clear. **Be careful when using it.**
 | cert_path               | *calculated*                   | Public certificate full path.
 | cert_name               | `"#{name}.pem"`                | Public certiticate file name.
 | cert_dir                | *calculated*                   | Public certificate directory path.
@@ -759,8 +775,9 @@ By default the resource will create a self-signed certificate, but a custom one 
 | cert_secret_file        | `nil`                          | Secret file used to decrypt the Data Bag where the SSL cert is stored.
 | cert_content            | *calculated*                   | SSL cert file content in clear.
 | subject_alternate_names | `nil`                          | Subject Alternate Names for the cert.
+| extended_key_usage      | `nil`                          | Extended keyUsage flags array
 | chain_path              | *calculated*                   | Intermediate certificate chain full path.
-| chain_name              | `nil`                          | File name of intermediate certificate chain file.
+| chain_name              | `nil`                          | File name of intermediate certificate chain file. **If this is not present, no chain file will be written.**
 | chain_dir               | *calculated*                   | Intermediate certificate chain directory path.
 | chain_source            | `nil`                          | Source type to get the intermediate certificate chain from. Can be `'attribute'`, `'data-bag'`, `'chef-vault'` or `'file'`.
 | chain_bag               | *calculated*                   | Name of the Data Bag where the intermediate certificate chain is stored.
@@ -773,6 +790,7 @@ By default the resource will create a self-signed certificate, but a custom one 
 | chain_combined_path     | *calculated*                   | Intermediate certificate chain combined file full path (for **nginx**).
 | ca_cert_path            | *nil*                          | Certificate Authority full path.
 | ca_key_path             | *nil*                          | Key Authority full path.
+| ca_key_passphrase       | *nil*                          | Key Authority passphrase.
 | pkcs12_path             | *nil*                          | Optional PKCS12 full path.
 | pkcs12_passphrase       | *nil*                          | Optional PKCS12 passphrase.
 
@@ -972,7 +990,11 @@ License and Author
 | **Contributor:**     | [Nikita Borzykh](https://github.com/sample)
 | **Contributor:**     | [Baptiste Courtois](https://github.com/Annih)
 | **Contributor:**     | [Taliesin Sisson](https://github.com/taliesins)
-| **Copyright:**       | Copyright (c) 2015, Xabier de Zuazo
+| **Contributor:**     | [Alexey Demidov](https://github.com/AlexeyDemidov)
+| **Contributor:**     | [Ali Ardestani](https://github.com/alisade)
+| **Contributor:**     | [HawkAndBaby](https://github.com/hawkandbaby)
+| **Contributor:**     | [Andrew J. Brown](https://github.com/andrewjamesbrown)
+| **Copyright:**       | Copyright (c) 2015-2017, Xabier de Zuazo
 | **Copyright:**       | Copyright (c) 2014-2015, Onddo Labs, SL.
 | **License:**         | Apache License, Version 2.0
 

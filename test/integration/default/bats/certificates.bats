@@ -111,3 +111,30 @@ setup() {
   openssl pkcs12 -in "${CERT_PATH}/dummy9.p12" -noout \
     -passin pass:DcpdHp6Xr8LM73cFdhdc
 }
+
+@test "creates dummy10 certificate" {
+  openssl x509 -in "${CERT_PATH}/dummy10.pem" -text -noout
+}
+
+@test "creates dummy10 certificate key" {
+  openssl rsa -in "${KEY_PATH}/dummy10.key" -text -noout
+}
+
+@test "sets dummy11 certificate key length" {
+  openssl x509 -in "${CERT_PATH}/dummy11.pem" -text -noout \
+    | grep -F 'Public-Key: (4096 bit)'
+}
+
+@test "creates dummy11 certificate key" {
+  openssl rsa -in "${KEY_PATH}/dummy11.key" -text -noout
+}
+
+@test "sets dummy12 extended key usage" {
+  openssl x509 -in "${CERT_PATH}/dummy12.pem" -text -noout \
+    | grep -A 1 'X509v3 Extended Key Usage:' \
+    | grep -F 'Web Client Authentication'
+}
+
+@test "creates dummy12 certificate key" {
+  openssl rsa -in "${KEY_PATH}/dummy12.key" -text -noout
+}

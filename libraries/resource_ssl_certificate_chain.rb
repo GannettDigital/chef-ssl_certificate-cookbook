@@ -4,6 +4,7 @@
 # Library:: resource_ssl_certificate_chain
 # Author:: Raul Rodriguez (<raul@raulr.net>)
 # Author:: Xabier de Zuazo (<xabier@zuazo.org>)
+# Copyright:: Copyright (c) 2016 Xabier de Zuazo
 # Copyright:: Copyright (c) 2014-2015 Onddo Labs, SL.
 # License:: Apache License, Version 2.0
 #
@@ -47,7 +48,7 @@ class Chef
             chain_content
             chain_combined_path
             chain_combined_name
-          )
+          ).freeze
         end
 
         unless defined?(::Chef::Resource::SslCertificate::Chain::SOURCES)
@@ -56,10 +57,9 @@ class Chef
             data_bag
             chef_vault
             file
-          )
+            self_signed
+          ).freeze
         end
-
-        public
 
         def initialize_chain_defaults
           initialize_attribute_defaults(Chain::ATTRS)
@@ -194,6 +194,10 @@ class Chef
           safe_read_from_path('SSL intermediary chain', chain_path)
         end
 
+        def default_chain_content_from_self_signed
+          nil
+        end
+
         def default_chain_content
           lazy_cached_variable(:default_chain_content) do
             source = filter_source(
@@ -204,8 +208,8 @@ class Chef
         end
 
         def default_chain_combined_path
-          lazy do
-            @default_chain_combined_path ||=
+          lazy_cached_variable(:default_chain_combined_path) do
+            read_namespace(%w(ssl_chain combined_path)) ||
               ::File.join(cert_dir, chain_combined_name)
           end
         end

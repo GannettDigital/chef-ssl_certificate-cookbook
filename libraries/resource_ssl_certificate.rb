@@ -6,6 +6,7 @@
 # Author:: Xabier de Zuazo (<xabier@zuazo.org>)
 # Author:: Steve Meinel (<steve.meinel@caltech.edu>)
 # Author:: Jeremy MAURO (<j.mauro@criteo.com>)
+# Copyright:: Copyright (c) 2016 Xabier de Zuazo
 # Copyright:: Copyright (c) 2014-2015 Onddo Labs, SL.
 # License:: Apache License, Version 2.0
 #
@@ -67,8 +68,6 @@ class Chef
         initialize_defaults
       end
 
-      public
-
       def initialize_attribute_defaults(attributes)
         attributes.each do |var|
           instance_variable_set("@#{var}".to_sym, send("default_#{var}"))
@@ -100,7 +99,7 @@ class Chef
           key_eql?(other) && cert_eql?(other) && name_eql?(other)
       end
 
-      alias_method :===,  :==
+      alias === ==
 
       def namespace(arg = nil)
         unless arg.nil? || arg.is_a?(Chef::Node) ||
@@ -116,7 +115,7 @@ class Chef
       def time(arg = nil)
         # ~ 10 years
         set_or_return(
-          :time, arg, kind_of: [Fixnum, String, Time], default: 315_360_000
+          :time, arg, kind_of: [Integer, String, Time], default: 315_360_000
         )
       end
 

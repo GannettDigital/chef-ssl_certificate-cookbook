@@ -4,6 +4,7 @@
 # Library:: resource_ssl_certificate_subject
 # Author:: Raul Rodriguez (<raul@raulr.net>)
 # Author:: Xabier de Zuazo (<xabier@zuazo.org>)
+# Copyright:: Copyright (c) 2016 Xabier de Zuazo
 # Copyright:: Copyright (c) 2014 Onddo Labs, SL.
 # License:: Apache License, Version 2.0
 #
@@ -42,7 +43,7 @@ class Chef
             organization
             department
             email
-          )
+          ).freeze
         end
 
         def initialize_subject_defaults
@@ -53,7 +54,7 @@ class Chef
           set_or_return(:common_name, arg, kind_of: String, required: true)
         end
 
-        alias_method :domain, :common_name
+        alias domain common_name
 
         def country(arg = nil)
           set_or_return(:country, arg, kind_of: [String])

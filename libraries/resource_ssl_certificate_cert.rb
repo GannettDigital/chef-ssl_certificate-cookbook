@@ -4,6 +4,7 @@
 # Library:: resource_ssl_certificate_cert
 # Author:: Raul Rodriguez (<raul@raulr.net>)
 # Author:: Xabier de Zuazo (<xabier@zuazo.org>)
+# Copyright:: Copyright (c) 2016 Xabier de Zuazo
 # Copyright:: Copyright (c) 2014-2015 Onddo Labs, SL.
 # License:: Apache License, Version 2.0
 #
@@ -46,9 +47,11 @@ class Chef
             cert_secret_file
             cert_content
             subject_alternate_names
+            extended_key_usage
             ca_cert_path
             ca_key_path
-          )
+            ca_key_passphrase
+          ).freeze
         end
 
         unless defined?(::Chef::Resource::SslCertificate::Cert::SOURCES)
@@ -59,10 +62,8 @@ class Chef
             file
             self_signed
             with_ca
-          )
+          ).freeze
         end
-
-        public
 
         def initialize_cert_defaults
           initialize_attribute_defaults(Cert::ATTRS)
@@ -112,6 +113,10 @@ class Chef
           set_or_return(:subject_alternate_names, arg, kind_of: Array)
         end
 
+        def extended_key_usage(arg = nil)
+          set_or_return(:extended_key_usage, arg, kind_of: Array)
+        end
+
         # CA cert public methods
 
         def ca_cert_path(arg = nil)
@@ -120,6 +125,10 @@ class Chef
 
         def ca_key_path(arg = nil)
           set_or_return(:ca_key_path, arg, kind_of: String)
+        end
+
+        def ca_key_passphrase(arg = nil)
+          set_or_return(:ca_key_passphrase, arg, kind_of: String)
         end
 
         protected
@@ -174,6 +183,10 @@ class Chef
 
         def default_subject_alternate_names
           lazy { read_namespace(%w(ssl_cert subject_alternate_names)) }
+        end
+
+        def default_extended_key_usage
+          lazy { read_namespace(%w(ssl_cert extended_key_usage)) }
         end
 
         def default_cert_content_from_attribute
@@ -270,6 +283,10 @@ class Chef
 
         def default_ca_key_path
           lazy { read_namespace(%w(ca_key_path)) }
+        end
+
+        def default_ca_key_passphrase
+          lazy { read_namespace(%w(ca_key_passphrase)) }
         end
       end
     end

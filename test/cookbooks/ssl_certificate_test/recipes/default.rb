@@ -4,6 +4,7 @@
 # Recipe:: default
 # Author:: Raul Rodriguez (<raul@raulr.net>)
 # Author:: Xabier de Zuazo (<xabier@zuazo.org>)
+# Copyright:: Copyright (c) 2016 Xabier de Zuazo
 # Copyright:: Copyright (c) 2014-2015 Onddo Labs, SL.
 # License:: Apache License, Version 2.0
 #
@@ -127,6 +128,18 @@ ssl_certificate 'dummy9' do
   source 'self-signed'
   pkcs12_path p12_path
   pkcs12_passphrase 'DcpdHp6Xr8LM73cFdhdc'
+end
+
+ssl_certificate 'dummy10' do
+  key_mode 00640
+end
+
+ssl_certificate 'dummy11' do
+  key_length 4096
+end
+
+ssl_certificate 'dummy12' do
+  extended_key_usage %w(clientAuth)
 end
 
 # Apache2 test

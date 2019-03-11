@@ -4,6 +4,7 @@
 # Library:: resource_ssl_certificate_pkcs12
 # Author:: Baptiste Courtois (<b.courtois@criteo.com>)
 # Author:: Xabier de Zuazo (<xabier@zuazo.org>)
+# Copyright:: Copyright (c) 2016 Xabier de Zuazo
 # Copyright:: Copyright (c) 2015 Criteo
 # License:: Apache License, Version 2.0
 #
@@ -36,10 +37,8 @@ class Chef
           ATTRS = %w(
             pkcs12_path
             pkcs12_passphrase
-          )
+          ).freeze
         end
-
-        public
 
         def initialize_pkcs12_defaults
           initialize_attribute_defaults(PKCS12::ATTRS)
@@ -57,7 +56,11 @@ class Chef
         def generate_pkcs12
           key = OpenSSL::PKey.read(key_content)
           crt = OpenSSL::X509::Certificate.new(cert_content)
-          OpenSSL::PKCS12.create(pkcs12_passphrase, name, key, crt).to_der
+          chain = if chain_content
+                    [crt, OpenSSL::X509::Certificate.new(chain_content)]
+                  end
+          OpenSSL::PKCS12.create(pkcs12_passphrase,
+                                 name, key, crt, chain).to_der
         end
 
         def pkcs12_content

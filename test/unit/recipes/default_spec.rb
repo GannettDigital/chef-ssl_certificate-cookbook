@@ -1,6 +1,7 @@
 # encoding: UTF-8
 #
 # Author:: Xabier de Zuazo (<xabier@zuazo.org>)
+# Copyright:: Copyright (c) 2016 Xabier de Zuazo
 # Copyright:: Copyright (c) 2014-2015 Onddo Labs, SL.
 # License:: Apache License, Version 2.0
 #
@@ -92,6 +93,20 @@ describe 'ssl_certificate_test::default', order: :random do
     expect(chef_run).to create_ssl_certificate('dummy9')
   end
 
+  it 'creates dummy10 certificate' do
+    expect(chef_run).to create_ssl_certificate('dummy10')
+  end
+
+  it 'creates dummy11 certificate' do
+    expect(chef_run).to create_ssl_certificate('dummy11')
+      .with_key_length(4096)
+  end
+
+  it 'creates dummy12 certificate' do
+    expect(chef_run).to create_ssl_certificate('dummy12')
+      .with_extended_key_usage(%w(clientAuth))
+  end
+
   it 'creates FQDN certificate' do
     expect(chef_run).to create_ssl_certificate(fqdn)
   end
@@ -132,7 +147,7 @@ describe 'ssl_certificate_test::default', order: :random do
       expect { chef_run }.to_not raise_error
     end
 
-    (1..4).each do |i|
+    ((1..4).to_a | (11..12).to_a).each do |i|
       it "creates dummy#{i} key" do
         expect(chef_run).to create_file("dummy#{i} SSL certificate key")
           .with_path("/etc/ssl/private/dummy#{i}.key")
@@ -292,6 +307,24 @@ describe 'ssl_certificate_test::default', order: :random do
           .with_sensitive(true)
       end
     end # 8 9 each
+
+    it 'creates dummy10 key' do
+      expect(chef_run).to create_file('dummy10 SSL certificate key')
+        .with_path('/etc/ssl/private/dummy10.key')
+        .with_owner('root')
+        .with_group('root')
+        .with_mode(00640)
+        .with_sensitive(true)
+    end
+
+    it 'creates dummy10 certificate' do
+      expect(chef_run).to create_file('dummy10 SSL public certificate')
+        .with_path('/etc/ssl/certs/dummy10.pem')
+        .with_owner('root')
+        .with_group('root')
+        .with_mode(00644)
+        .with_sensitive(true)
+    end
 
     it 'creates FQDN key' do
       expect(chef_run).to create_file("#{fqdn} SSL certificate key")
